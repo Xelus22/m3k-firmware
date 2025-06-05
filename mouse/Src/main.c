@@ -296,14 +296,10 @@ int main(void) {
 		if (whl_count == 0) {
 			const int whl_now = whl_read();
 			if (whl_now != whl_last) {
-				if (!((whl_now == 0 && whl_last == 3) || (whl_now == 3 && whl_last == 0))) {
-					if (whl_now == 0 && whl_lastlast == 3) {
-						new.whl = (whl_last == 1) ? -1 : (whl_last == 2) ? 1 : 0;
-					} else if (whl_now == 3 && whl_lastlast == 0) {
-						new.whl = (whl_last == 1) ? 1 : (whl_last == 2) ? -1 : 0;
-					}
-					whl_lastlast = whl_last;
-					whl_last = whl_now;
+				if (!((!(whl_now == 0 && whl_lastlast == 3) && !(whl_now == 3 && whl_lastlast == 0)) || (whl_last == 0 || whl_last == 3))) {
+					new.whl = now ^ last;
+				    new.whl |= 0b11111101;
+				    new.whl += 2;
 				}
 			}
 		}
