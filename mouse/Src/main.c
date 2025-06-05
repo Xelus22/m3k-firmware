@@ -298,8 +298,8 @@ int main(void) {
 			if (whl_now != whl_last) {
 				if (!((!(whl_now == 0 && whl_lastlast == 3) && !(whl_now == 3 && whl_lastlast == 0)) || (whl_last == 0 || whl_last == 3))) {
 					new.whl = now ^ last;
-				    new.whl |= 0b11111101;
-				    new.whl += 2;
+					new.whl |= 0b11111101;
+					new.whl += 2;
 				}
 			}
 		}
