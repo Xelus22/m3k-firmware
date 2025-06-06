@@ -227,6 +227,29 @@ static inline uint32_t mode_process(Config *cfg, int *skip,
 	return (mode == 0) ? 0xFFFFFFFF : 0xFFFFFFFC;
 }
 
+static inline int8_t decode_encoder_scroll(int8_t lastlast, uint8_t last, uint8_t now) {
+	int8_t dir = 0;
+	// checks if LL and now are exclusively 0 and 3 (both ways)
+	int8_t newLL = lastlast - 1;
+	int8_t newNow = now - 1;
+	uint8_t validState = newLL ^ newNow;
+
+	// checks if the last value is 1 or 2
+	uint8_t newLast = last - 1;
+	uint8_t validLast = ((~newLast) & 0x02) >> 1;
+
+	// combine both checks
+	uint8_t validEncoderState = ~validState | validLast;
+
+	if (validEncoderState == 0x03) {
+		dir = now ^ last;
+		dir |= 0b11111101;
+		dir += 2;
+	}
+
+	return dir;
+}
+
 int main(void) {
 //	extern uint32_t _sitcm;
 //	SCB->VTOR = (uint32_t)(&_sitcm);
@@ -296,11 +319,7 @@ int main(void) {
 		if (whl_count == 0) {
 			const int whl_now = whl_read();
 			if (whl_now != whl_last) {
-				if (!((!(whl_now == 0 && whl_lastlast == 3) && !(whl_now == 3 && whl_lastlast == 0)) || (whl_last == 0 || whl_last == 3))) {
-					new.whl = now ^ last;
-					new.whl |= 0b11111101;
-					new.whl += 2;
-				}
+				new.whl = decode_encoder_scroll(whl_lastlast, whl_last, whl_now);
 			}
 		}
 		if (hs_usb) // only run wheel code every 4 microframes
